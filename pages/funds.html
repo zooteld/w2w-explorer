@@ -1,0 +1,250 @@
+<div class="card mg-t-20" id="fundsVerify">
+  <div class="card-header tx-medium bd-0 tx-white bg-primary-dark">
+    <h2>
+      <i class="fa fa-bank" aria-hidden="true"></i> Funds
+      <button class="btn btn-primary-outline" type="button" id="verifyFunds">
+        <span class="btnIcon fa fa-search"></span><span tkey="bpVerify">Verify</span>
+      </button>
+    </h2>
+  </div>
+  <div class="card-body card-body-info">
+    <div class="row">
+      <div class="col-lg-12">
+        <div class="panel panel-default" id="verification_result">
+          <div class="panel-heading">
+            <h3 class="panel-title" tkey="bpVerificationResult">Verification result</h3>
+          </div>
+          <div class="panel-body">
+            <p class="verified"><i class="fa fa-2x"></i> <span></span></p>
+          </div>
+        </div>
+        <table id="fundsTable" class="table display responsive nowrap">
+          <thead>
+            <tr>
+              <th class="wd-15p ntFundsGroup">Group</th>
+              <th class="wd-15p ntFundsCategory">Category</th>
+              <th class="wd-20p ntFundsPaid">Paid (W2W)</th>
+            </tr>
+          </thead>
+          <tbody></tbody>
+          <tfoot>
+            <tr class="fundsFooter">
+              <th colspan="2">Total spent so far:</th>
+              <th></th>
+            </tr>
+          </tfoot>
+        </table>
+      </div>
+    </div>
+  </div>
+  <p class="text-center">
+    <a href="funds.dat" target="_blank" download="funds.dat">
+      <button type="button" class="btn btn-primary-outline" id="downloadFunds" tkey="btnDownloadFunds">
+        Download Funds
+      </button>
+    </a>
+    <button type="button" class="btn btn-primary-outline" id="uploadFunds" tkey="btnUploadFunds">Update Funds</button>
+  </p>
+</div>
+
+
+<div id="uploadFundsDialog" class="modal fade" style="display: none;" aria-hidden="true">
+  <div class="modal-dialog modal-lg" role="document">
+    <div class="modal-content bd-0 bg-transparent rounded overflow-hidden">
+      <div class="modal-body pd-0">
+        <div class="row no-gutters">
+          <div class="col-lg-12 bg-gray-900">
+            <div class="pd-y-30 pd-xl-x-30">
+              <button type="button" class="close tx-white" data-dismiss="modal" aria-label="Close">
+                <span aria-hidden="true">×</span>
+              </button>
+              <div class="pd-x-30 pd-y-10">
+                <h3 class="tx-gray-300 tx-normal mg-b-5">Upload the funds data</h3>
+                <p>Paste the correctly formatted funds.dat JSON file into the field</p>
+                <div class="form-group">
+                  <label for="uploadKey">Upload key</label>
+                  <input name="uploadKey" class="form-control" id="uploadKey" placeholder="Enther the upload key"
+                    type="password">
+                </div>
+                <div class="form-group mg-b-20">
+                  <label for="fundsData">Funds data...</label>
+                  <textarea name="fundsData" class="form-control" id="fundsData"></textarea>
+                </div><!-- form-group -->
+                <div class="form-group mg-b-20">
+                  <label id="uploadError"></label>
+                </div><!-- form-group -->
+
+                <button class="btn btn-primary btn-block" id="btnUploadFundsData">Upload</button>
+              </div>
+            </div><!-- pd-20 -->
+          </div><!-- col-6 -->
+        </div><!-- row -->
+      </div><!-- modal-body -->
+    </div><!-- modal-content -->
+  </div><!-- modal-dialog -->
+</div>
+
+<div id="uploadSuccessDialog" class="modal fade" style="display: none;" aria-hidden="true">
+  <div class="modal-dialog" role="document">
+    <div class="modal-content bd-0 bg-transparent rounded overflow-hidden">
+      <div class="modal-body pd-0">
+        <div class="row no-gutters">
+          <div class="col-lg-12 bg-gray-900">
+            <div class="pd-y-30 pd-xl-x-30">
+              <div class="pd-x-30 pd-y-10">
+                <h3 class="tx-gray-300 tx-normal mg-b-5">Funds were succesfully uploaded!</h3>
+                <p style="text-align: center;">Click the OK button to close the dialog</p>
+                <button class="btn btn-primary btn-block" data-dismiss="modal">OK</button>
+              </div>
+            </div><!-- pd-20 -->
+          </div><!-- col-6 -->
+        </div><!-- row -->
+      </div><!-- modal-body -->
+    </div><!-- modal-content -->
+  </div><!-- modal-dialog -->
+</div>
+
+<script>
+  var result_container = $("#verification_result");
+  result_container.hide();
+  var groupColumn = 0;
+  var fundsProof = null;
+
+  var categories = {
+    Operations: "Operations Management",
+    Development: "Research & Development",
+    Marketing: "Marketing & PR",
+    Exchanges: "Echanges & Partnetships"
+  }
+
+  currentPage = {
+    destroy: function () { },
+    init: function () {
+      loadTranslations();
+    },
+    update: function () { }
+  };
+
+  function numberWithCommas(x) {
+    return x.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
+  }
+
+  function makeid(length) {
+    var result = '';
+    var characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
+    var charactersLength = characters.length;
+    for (var i = 0; i < length; i++) {
+      result += characters.charAt(Math.floor(Math.random() * charactersLength));
+    }
+    return result;
+  }
+
+  $.getJSON("funds.dat?" + makeid(20), function (result) {
+    fundsProof = result;
+
+    $('#fundsTable').DataTable({
+      "displayLength": 300,
+      "data": fundsProof.data,
+      "searching": false,
+      "paging": false,
+      "ordering": false,
+      "responsive": true,
+      "info": true,
+      "columns": [
+        {
+          className: "ntFundsGroup",
+          "visible": false
+        }, {
+          className: "ntFundsCategory"
+        }, {
+          className: "ntFundsPaid"
+        }
+      ],
+      rowGroup: {
+        startRender: function (rows, group) {
+          return categories[group] + ' (' + rows.count() + ' categories)';
+        },
+        endRender: function (rows, group) {
+          var sumPaid = rows
+            .data()
+            .pluck(2)
+            .reduce(function (a, b) {
+              return a + b.replace(/[^\d]/g, '') * 1;
+            }, 0);
+
+          if ($('#fundsTable').DataTable().columns(':visible').count() > 1) {
+            return $('<tr/>')
+              .append('<td class="sumTitle">Sumarum for ' + categories[group] + '</td>')
+              .append('<td class="sumPaid">' + numberWithCommas(sumPaid) + '</td>');
+          } else {
+            return $('<tr/>')
+              .append('<td class="sumTitle">Sumarum: ' + numberWithCommas(sumPaid) + '</td>');
+          }
+        },
+        dataSrc: 0
+      },
+      footerCallback: function (row, data, start, end, display) {
+        var api = this.api(), data;
+
+        // Remove the formatting to get integer data for summation
+        var intVal = function (i) {
+          return typeof i === 'string' ?
+            i.replace(/[\$,]/g, '') * 1 :
+            typeof i === 'number' ?
+              i : 0;
+        };
+
+        // Total over all pages
+        total = api
+          .column(2)
+          .data()
+          .reduce(function (a, b) {
+            return intVal(a) + intVal(b);
+          }, 0);
+
+        // Total over this page
+        pageTotal = api
+          .column(2, { page: 'current' })
+          .data()
+          .reduce(function (a, b) {
+            return intVal(a) + intVal(b);
+          }, 0);
+
+        // Update footer
+        if ($('#fundsTable').DataTable().columns(':visible').count() > 1) {
+          $(api.column(1).footer()).html("Total spent so far:");
+          $(api.column(2).footer()).html(numberWithCommas(pageTotal));
+        } else {
+          $(api.column(1).footer()).html("Total spent: " + numberWithCommas(pageTotal));
+        }
+      }
+    });
+  });
+
+  $("#verifyFunds").click(function () {
+    result_container.hide();
+    checkReserve(result_container, "", fundsProof.keys.address, fundsProof.keys.signature);
+  });
+
+  $("#uploadFunds").click(function () {
+    $("#uploadError").hide();
+    $("#uploadKey").val("");
+    $("#fundsData").val(JSON.stringify(fundsProof, null, 2));
+    $('#uploadFundsDialog').modal('show');
+  });
+
+  $("#btnUploadFundsData").click(function () {
+    $.post("funds.php", { fundsData: $("#fundsData").val(), uploadKey: $("#uploadKey").val() }).done(function (data) {
+      var responseData = JSON.parse(data);
+
+      if (responseData.success) {
+        $('#uploadFundsDialog').modal('hide');
+        $('#uploadSuccessDialog').modal('show');
+      } else {
+        $("#uploadError").html(responseData.reason);
+        $("#uploadError").show();
+      }
+    });
+  });
+
+</script>

@@ -1,0 +1,21 @@
+var api = 'https://explorer.w2wcoin.org/daemon';
+var donationAddress = "";
+var blockTargetInterval = 120;
+var coinUnits = 1000000;
+var symbol = 'W2W';
+var refreshDelay = 5000;
+// pools stats by MainCoins
+var networkStat = {
+	"W2W": [
+        ["w2wcoin.blockfoundry.org", "https://w2wcoin.blockfoundry.org/api"]
+	]
+};
+var networkStat2 = {
+    "W2W": [
+        ["w2wcoin.luckypool.io", "https://w2wcoin.luckypool.io/api"]
+ ]
+};
+
+
+
+
